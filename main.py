@@ -1,8 +1,9 @@
 from typing import List
 
-from itertools import combinations, permutations
+from itertools import combinations
 import uvicorn
 from fastapi import FastAPI, APIRouter
+from fastapi.openapi.utils import get_openapi
 from haversine import haversine_vector, Unit
 from deap import algorithms
 from deap import base
@@ -126,6 +127,24 @@ def viajero(distance_map, IND_SIZE):
 
 
 app.include_router(punto)
+
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    openapi_schema = get_openapi(
+        title="Algoritmos Evolutivos",
+        version="2.5.0",
+        description="Sistema de optimizacion de rutas para el Serenazgo de Nuevo Chimbote",
+        routes=app.routes,
+    )
+    openapi_schema["info"]["x-logo"] = {
+        "url": "https://fastapi.tiangolo.com/img/logo-margin/logo-teal.png"
+    }
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+
+app.openapi = custom_openapi
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
